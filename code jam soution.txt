@@ -1,0 +1,281 @@
+Problem 1:
+
+import numpy as np
+m=int(input())
+tr=[]
+ro=[]
+co=[]
+s=int(m)
+while(s>0):
+    n=int(input())
+    l=[]
+    k=[]
+    R=0
+    C=0
+    for i in range(n):
+        l= list(map(int, input().split()))
+        if(len(l)!=len(set(l))):
+            R=R+1
+        k.append(l)
+    a=np.array(k)    
+    b=a.transpose()
+    for i in range(len(b)):
+        if(len(b[i])!=len(set(b[i]))):
+            C=C+1
+    v=a.trace()
+    tr.append(v)
+    ro.append(R)
+    co.append(C)
+    s=s-1
+for i in range(m):
+    print("case #"+str(i+1)+":",tr[i],ro[i],co[i])
+
+
+
+
+
+
+
+
+
+Problem 2:
+
+def solve(t,result,prev):
+    if prev != '' and t != '':
+        if int(prev) > int(t[0]):
+            for i in range(int(prev)-int(t[0])):
+                result = result + ')'
+    if t == '':
+        for i in range(int(prev)):
+            result = result + ')'
+        return result
+    if int(t[0]) == 0:
+        return solve(t[1:],result + t[0],t[0])
+    if int(t[0]) == 1:
+        if prev != '':
+            if int(prev) == 0:
+                result = result + '(' + t[0]
+            else:
+                result = result + t[0]
+        else:
+            result = result + '(' + t[0]
+        return solve(t[1:],result,t[0])
+    if int(t[0]) > 1:
+        if prev != '':
+            for i in range(int(t[0]) - int(prev)):
+                result = result + '('
+            result = result + t[0]
+        else:
+            for i in range(int(t[0])):
+                result = result + '('
+            result = result + t[0]
+        return solve(t[1:],result,t[0])
+t = int(input())
+for m in range(0,t):
+    k = input()
+    print('Case #{}: {}'.format(m + 1,solve(k,'','')))
+
+
+
+
+
+
+
+Problem 3:
+
+#include<bits/stdc++.h>
+#define int long long
+#define pb push_back
+#define f1(n) for(int i=0;i<n;i++)
+#define f2(n) for(int i=n-1;i>=0;i--)
+#define fast ios::sync_with_stdio(false);
+using namespace std;
+signed main()
+{
+	fast
+	int x,kk=1;
+	cin>>x;
+	while(x--)
+	{
+		int n;
+		cin>>n;
+		map<pair<int,int>,int> mm;
+		vector<pair<int,int> >v;
+		for(int i=0;i<n;i++){
+			int x1,y1;
+			cin>>x1>>y1;
+			mm[{x1,y1}]=i;
+			v.push_back(make_pair(x1,y1));
+		}
+		sort(v.begin(),v.end());
+		string javab="";
+		for(int i=0;i<n;i++) javab+="C";
+	    javab[mm[{v[0].first,v[0].second}]]='C';
+	    int e_c=v[0].second,e_j,fl=0,im1=0;
+	    for(int i=1;i<n;i++){
+	    	if(v[i].first>=e_c){
+	    		javab[mm[{v[i].first,v[i].second}]]='C';
+	    		e_c=v[i].second;
+			}
+			else if(v[i].first<e_c && fl==0){
+				fl=1;
+				e_j=v[i].second;
+				javab[mm[{v[i].first,v[i].second}]]='J';
+			}
+			else if(v[i].first<e_c && v[i].first>=e_j){
+				e_j=v[i].second;
+				javab[mm[{v[i].first,v[i].second}]]='J';
+			}
+			else if(v[i].first<e_c && v[i].first<e_j){
+				im1=1;
+				break;
+			}
+		}
+		if(im1==1) cout<<"Case #"<<kk<<": "<<"IMPOSSIBLE"<<endl;
+		else cout<<"Case #"<<kk<<": "<<javab<<endl;
+		kk++;
+	}
+}
+
+
+
+
+
+
+
+
+
+Problem 4:
+
+from itertools import combinations
+import numpy as np
+import sys
+
+def complement(bits): return [
+    '_' if b is '_' else 
+    '1' if b=='0' else '0' 
+    for b in bits
+]
+
+class QuantumArray():
+    def __init__(self, B):
+        self.bits = ['_'] * B
+        self.unkowns = list(range(B))
+        self.read(10)
+        self.run()
+
+    def read(self, n):
+        for _ in range(n):
+            i = self.unkowns.pop()
+            self.bits[i] = self.read_bit(i+1)
+            self.unkowns = self.unkowns[::-1]
+        self.update_states()
+
+    def read_bit(self, i):
+        print(i, flush=True)
+        return input()
+
+    def update_states(self):
+        self.bits_c  = complement(self.bits)
+        self.bits_cr = self.bits_c[::-1]
+        self.bits_r  = complement(self.bits_cr)
+        self.states = [self.bits, self.bits_c, self.bits_cr, self.bits_r]
+
+    def get_test_idx(self):
+        candidates = list(set(range(B)) - set(self.unkowns))
+        max_states = len(set(map(tuple, self.states)))
+        for idx in combinations(candidates, 2):
+            num_states = len(set(
+                tuple(np.take(state, idx))
+                for state in self.states
+            ))
+            if num_states == max_states: return idx
+
+    def collapse(self):        
+        test_idx = self.get_test_idx()
+        test = [self.read_bit(i+1) for i in test_idx]
+                
+        self.bits = next(state
+            for state in self.states
+            if test == list(np.take(state, test_idx))
+        )
+
+    def run(self):
+        while True:
+            self.collapse()
+            try: self.read(8)
+            except IndexError: break
+    
+
+T, B = map(int, input().split())
+print('B:', B, file=sys.stderr)
+for _ in range(T): 
+    array = QuantumArray(B)
+    print('guess:', ''.join(array.bits), file=sys.stderr)
+    print(''.join(array.bits), flush=True)
+    if input() == 'N': sys.exit()
+
+
+
+
+
+
+Problem 5:
+
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int sqr[60][60], n, k, t;
+bool row_safe[60][60], col_safe[60][60], solved;
+
+void solver(int row, int col, int m) {
+    if (row == n && col == n + 1 && m == k && !solved) {
+        solved = true;
+        cout << "Case #" << t << ": " << "POSSIBLE\n";
+        for (int i = 1; i <= n; ++i) {
+            for (int j = 1; j <= n; ++j) {
+                cout << sqr[i][j] << " ";
+            }
+            cout << "\n";
+        }
+        return;
+    } else if (row > n) {
+        return;
+    } else if (col > n) {
+        solver(row + 1, 1, m);
+    }
+    for (int i = 1; i <= n && !solved; ++i) {
+        if (!row_safe[row][i] && !col_safe[col][i]) {
+            row_safe[row][i] = col_safe[col][i] = true;
+            if (row == col) {
+                m += i;
+            }
+            sqr[row][col] = i;
+
+            solver(row, col + 1, m);
+
+            row_safe[row][i] = col_safe[col][i] = false;
+            if (row == col) {
+                m -= i;
+            }
+            sqr[row][col] = 0;
+        }
+    }
+}
+
+int main() {
+    int T;
+    scanf(" %d", &T);
+    for (t = 1; t <= T; ++t) {
+        scanf(" %d %d", &n, &k);
+        solver(1, 1, 0);
+        if (!solved) {
+            cout << "Case #" << t << ": " << "IMPOSSIBLE\n";
+        }
+        solved = false;
+    }
+    return 0;
+}
+
